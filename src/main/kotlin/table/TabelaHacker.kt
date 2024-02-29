@@ -1,10 +1,7 @@
 package table
 
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -18,15 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.isCtrlPressed
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -455,7 +450,7 @@ internal fun criaTitleColumn(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun criaTabela(
     apenasLocalizar: MutableState<Boolean>,
@@ -481,8 +476,16 @@ internal fun criaTabela(
         }
     }
 
+    val pressionado = remember { mutableStateOf(false) }
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.draggable(
+        enabled = true,
+        onDragStarted = {pressionado.value = true},
+        onDragStopped = {pressionado.value = false},
+        reverseDirection = true,
+        orientation = Orientation.Vertical,
+        state = DraggableState {  }
+    )) {
 
 
 //        val lis = remember { mutableStateListOf<List<Dado>>() }
@@ -512,6 +515,10 @@ internal fun criaTabela(
                         .onGloballyPositioned { coordinates ->
                             boxMaxHeight.value = coordinates.size.height.dp
                         }
+                        .onPointerEvent(PointerEventType.Enter) {
+                                println(item)
+
+                        }
                         .combinedClickable(
                             onClick = {
                                 onSelectionChange(item)
@@ -520,7 +527,6 @@ internal fun criaTabela(
                             }),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
 
 
                     for (i in 0 until columnCount) {
